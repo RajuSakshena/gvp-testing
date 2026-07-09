@@ -34,7 +34,6 @@ import {
   FaMapMarkerAlt,
   FaRecycle,
   FaChartBar,
-  FaExclamationTriangle,
   FaDownload,
   FaFileExcel,
 } from "react-icons/fa";
@@ -1408,30 +1407,6 @@ const normalizeRow = (row) => {
   });
 
   return norm;
-};
-
-// Stable deduplication — uses row.start as the ONLY primary key.
-// row.start is a unique timestamp string per submission (e.g. "2025-07-16T13:12:11.430+05:30").
-// DO NOT use latitude, longitude, ward, cluster_id, or array index as keys.
-// If a later row has the same start value, the ENTIRE row replaces the earlier one.
-// Never merge properties one-by-one; always replace the whole object.
-const deduplicate = (rows) => {
-  // Build a Map keyed on row.start — last writer wins (handles API refresh updates)
-  const map = new Map();
-  for (const row of rows) {
-    const key = row.start;
-    if (key !== undefined && key !== null && key !== "") {
-      // Replace entire row — never partial merge
-      map.set(key, row);
-    } else {
-      // Rows without a start value (shouldn't happen, but handle gracefully):
-      // Fall back to a unique sentinel so they're kept but not merged with each other.
-      // Use a combination of fields that together identify the record.
-      const fallbackKey = `_fallback_:${row._uuid || row._id || row.id || ""}_${row["_Record_the_location_of_GVP_latitude"] || ""}_${row["_Record_the_location_of_GVP_longitude"] || ""}_${Math.random()}`;
-      map.set(fallbackKey, row);
-    }
-  }
-  return [...map.values()];
 };
 
 // MapController - updates map center/bounds reactively (fixes whenCreated deprecation)
