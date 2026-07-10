@@ -2177,14 +2177,6 @@ function App() {
                       <div className="w-full h-80 sm:h-72 md:h-80 lg:h-96">
                         <ResponsiveContainer width="100%" height={340}>
                           <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                            <defs>
-                              {COLORS.map((color, index) => (
-                                <linearGradient key={`pieGrad-${index}`} id={`pieGrad-${index}`} x1="0" y1="0" x2="1" y2="1">
-                                  <stop offset="0%" stopColor={color} stopOpacity={1} />
-                                  <stop offset="100%" stopColor={color} stopOpacity={0.7} />
-                                </linearGradient>
-                              ))}
-                            </defs>
                             <Pie
                               data={pieData}
                               dataKey="value"
@@ -2199,11 +2191,12 @@ function App() {
                               minAngle={5}
                               stroke="#ffffff"
                               strokeWidth={2}
+                              isAnimationActive={!isCapturingScreenshot}
                             >
                               {pieData.map((entry, index) => (
                                 <Cell
                                   key={`cell-${index}`}
-                                  fill={`url(#pieGrad-${index % COLORS.length})`}
+                                  fill={COLORS[index % COLORS.length]}
                                 />
                               ))}
                             </Pie>
@@ -2249,6 +2242,7 @@ function App() {
                               label={renderCustomBarLabel}
                                 radius={[0, 6, 6, 0]}
                                 activeBar={{ fillOpacity: 0.85 }}
+                                isAnimationActive={!isCapturingScreenshot}
                               >
                               {reasonsData.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={BAR_COLORS[index % BAR_COLORS.length]} />
@@ -2306,6 +2300,7 @@ function App() {
                                 label={renderCustomBarLabel}
                                 radius={[0, 6, 6, 0]}
                                 activeBar={{ fillOpacity: 0.85 }}
+                                isAnimationActive={!isCapturingScreenshot}
                               >
                                 {problemsData.map((_, i) => (
                                   <Cell
@@ -2360,6 +2355,7 @@ function App() {
                                 label={renderCustomBarLabel}
                                 radius={[0, 6, 6, 0]}
                                 activeBar={{ fillOpacity: 0.85 }}
+                                isAnimationActive={!isCapturingScreenshot}
                               >
                                 {settingData.map((_, i) => (
                                   <Cell
@@ -2416,6 +2412,7 @@ function App() {
                                 label={renderCustomBarLabel}
                                 radius={[0, 6, 6, 0]}
                                 activeBar={{ fillOpacity: 0.85 }}
+                                isAnimationActive={!isCapturingScreenshot}
                               >
                                 {whoDisposeData.map((_, i) => (
                                   <Cell
@@ -2471,6 +2468,7 @@ function App() {
                                 label={renderCustomBarLabel}
                                 radius={[0, 6, 6, 0]}
                                 activeBar={{ fillOpacity: 0.85 }}
+                                isAnimationActive={!isCapturingScreenshot}
                               >
                                 {solutionData.map((_, i) => (
                                   <Cell
