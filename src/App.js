@@ -28,14 +28,14 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet.markercluster"; // plain Leaflet plugin — attaches L.markerClusterGroup, no React dependency
 import ReactDOMServer from "react-dom/server";
 import { useMediaQuery } from "react-responsive";
-import * as XLSX from "xlsx";
+import html2canvas from "html2canvas";
 import CountUp from "react-countup";
 import {
   FaMapMarkerAlt,
   FaRecycle,
   FaChartBar,
   FaDownload,
-  FaFileExcel,
+  FaCamera,
 } from "react-icons/fa";
 
 import staticDataRaw from "./data_cleaned.json";
@@ -96,129 +96,6 @@ const calculatePieForRow = (row) => {
   return Object.entries(wasteTypeToColumnMap)
     .filter(([type, column]) => row[column] === 1)
     .map(([type]) => ({ name: type, value: 1 }));
-};
-
-// ===================== EXCEL EXPORT HELPERS =====================
-// These helpers only READ already-normalized fields (the same boolean
-// flags / values used by TooltipContent, DataTable, and the charts).
-// They do not alter normalization or filtering logic in any way.
-
-const WASTE_QUANTITY_LABELS = {
-  some_100_kg: "~100 kg",
-  below_500_kg: "Below 500 kg",
-  "_500kg_1_tonne": "500 kg - 1 Tonne",
-  above_1_tonne: "Above 1 Tonne",
-};
-
-// Recreates the same fallback chain normalizeRow() uses, purely for display.
-const getWasteQuantityLabel = (row) => {
-  let rawQuantity = row["Approx_Waste_Quantity_Found_at_GVP"];
-  if (!rawQuantity || String(rawQuantity).trim() === "") {
-    rawQuantity =
-      row["Approx Waste Quantity Found at GVP"] ||
-      row["Waste Quantity"] ||
-      row["approx_waste_quantity_found_at_gvp"] ||
-      row["ApproxWasteQuantityFoundatGVP"] ||
-      row["Approx_quantity_of_waste_at_GV"] ||
-      "";
-  }
-  const cleaned = String(rawQuantity || "").trim().toLowerCase().replace(/\s+/g, "_");
-  return WASTE_QUANTITY_LABELS[cleaned] || "N/A";
-};
-
-const getWasteTypeLabelsForRow = (row) => {
-  const labels = Object.entries(wasteTypeToColumnMap)
-    .filter(([, column]) => row[column] === 1)
-    .map(([type]) => type);
-  return labels.length > 0 ? labels.join(", ") : "N/A";
-};
-
-const PROBLEM_LABEL_MAP = {
-  problem_bad_odour: "Bad Odour",
-  problem_mosquitos: "Mosquitos",
-  problem_stray_animals: "Stray Animals",
-  problem_congestion: "Congestion",
-  problem_other: "Other",
-};
-
-const REASON_LABEL_MAP = {
-  reason_no_collection: "No Regular Collection Vehicle",
-  reason_random_people: "Random People Throwing Garbage",
-  reason_user_fee: "Due To User Fee",
-  reason_vehicle_time: "Mismatch of Vehicle Time",
-  reason_narrow_road: "Due to Narrow Road",
-  reason_market_vendors: "Because of Market and Street Vendors",
-};
-
-const SOLUTION_LABEL_MAP = {
-  solution_bins_facilities: "Bins and Facilities",
-  solution_technology_monitoring: "Technology-Enabled Monitoring",
-  solution_strict_enforcement: "Strict Enforcement Measures",
-  solution_public_awareness: "Public Awareness & Education",
-  solution_sanitization_roster: "Sanitization Vehicle Roster",
-  solution_regulatory_support: "Regulatory & Administrative Support",
-  solution_efficient_collection: "Efficient Waste Collection System",
-  solution_neutral: "Neutral Feedback",
-};
-
-const getFlagLabels = (row, labelMap) => {
-  const labels = Object.entries(labelMap)
-    .filter(([key]) => row[key] === 1)
-    .map(([, label]) => label);
-  return labels.length > 0 ? labels.join(", ") : "N/A";
-};
-
-const getVolunteerName = (row) => {
-  return (
-    row["Volunteer"] ||
-    row["Volunteer Name"] ||
-    row["volunteer_name"] ||
-    row["Name_of_Volunteer"] ||
-    row["_submitted_by"] ||
-    row["username"] ||
-    "N/A"
-  );
-};
-
-const formatExportDate = (value) => {
-  if (!value) return "N/A";
-  const d = new Date(value);
-  if (isNaN(d.getTime())) return String(value);
-  return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
-};
-
-// Builds the "Raw Data" sheet rows from whatever dataset is currently
-// visible on screen (already filtered by city/ward/selection upstream).
-const buildRawExportRows = (rows) => {
-  return rows.map((row) => ({
-    Ward: row["GVP Ward"] ?? "N/A",
-    "Nearest Location": row["Nearest Location"] || "N/A",
-    "Waste Quantity": getWasteQuantityLabel(row),
-    "Waste Volume (Hath Gadi)": Number(row["waste_hath_gadi"]) || 0,
-    "Waste Type": getWasteTypeLabelsForRow(row),
-    Latitude: row["_Record_the_location_of_GVP_latitude"] ?? "N/A",
-    Longitude: row["_Record_the_location_of_GVP_longitude"] ?? "N/A",
-    Volunteer: getVolunteerName(row),
-    Problems: getFlagLabels(row, PROBLEM_LABEL_MAP),
-    Reason: getFlagLabels(row, REASON_LABEL_MAP),
-    Solution: getFlagLabels(row, SOLUTION_LABEL_MAP),
-    Date: formatExportDate(row.start),
-    "Photo URL": row["Photo URL"] || "N/A",
-    "Video URL": row["Video URL"] || "N/A",
-  }));
-};
-
-// Simple helper to auto-size columns based on content length
-const autoSizeColumns = (rows) => {
-  if (!rows || rows.length === 0) return [];
-  const headers = Object.keys(rows[0]);
-  return headers.map((header) => {
-    const maxLen = rows.reduce(
-      (max, row) => Math.max(max, String(row[header] ?? "").length),
-      header.length
-    );
-    return { wch: Math.min(Math.max(maxLen + 2, 10), 60) };
-  });
 };
 
 // Custom Labels for Pie
@@ -1595,7 +1472,10 @@ function App() {
   const [isKeyFindingsOpen, setIsKeyFindingsOpen] = useState(false);
   const [mapLayerType, setMapLayerType] = useState("street"); // "street" | "satellite"
   const [showAnalyticsFab, setShowAnalyticsFab] = useState(false);
+  const [isCapturingScreenshot, setIsCapturingScreenshot] = useState(false);
   const mapSectionRef = useRef(null);
+  const dashboardCaptureRef = useRef(null); // wraps cards + wards + photos + map (everything currently on screen)
+  const analyticsCaptureRef = useRef(null); // wraps just the charts inside the Key Findings popup
 
   const handleMapReady = useCallback((map) => {
     mapInstanceRef.current = map;
@@ -1793,101 +1673,105 @@ function App() {
     setSelectedWards(uniqueWards);
   };
 
-  // ===================== EXCEL EXPORT =====================
-  // Exports EXACTLY what is currently visible on screen:
-  // same dataset that drives the cards, charts, map, and table
-  // (filteredDataForCards — i.e. respects city + ward filters,
-  // and a single selected point if the user has drilled into one).
-  const handleDownloadExcel = useCallback(() => {
-    const exportRows = selectedRow ? [selectedRow] : filteredDataForCards;
-    if (!exportRows || exportRows.length === 0) {
-      window.alert("No data available to export for the current filter.");
-      return;
-    }
-
-    const wb = XLSX.utils.book_new();
-
-    // Sheet 1: Raw filtered data
-    const rawRows = buildRawExportRows(exportRows);
-    const wsRaw = XLSX.utils.json_to_sheet(rawRows);
-    wsRaw["!cols"] = autoSizeColumns(rawRows);
-    XLSX.utils.book_append_sheet(wb, wsRaw, "Raw Data");
-
-    // Sheet 2: Dashboard Summary
-    const topOf = (arr) => (arr && arr.length > 0 ? [...arr].sort((a, b) => b.value - a.value)[0].name : "N/A");
-    const wardLabel = selectedRow
-      ? String(selectedRow["GVP Ward"] ?? "N/A")
-      : selectedWards.length > 0
-      ? selectedWards.join(", ")
-      : "All";
-
-    const summaryRows = [
-      { Field: "Current City", Value: selectedCity },
-      { Field: "Current Ward", Value: wardLabel },
-      { Field: "Total GVP", Value: totalGarbagePoints },
-      { Field: "Waste Volume (Hath Gadi)", Value: Math.round(totalHathGadiVolume) },
-      { Field: "Top Waste Type", Value: topOf(pieData) },
-      { Field: "Top Problem", Value: topOf(problemsData) },
-      { Field: "Top Reason", Value: topOf(reasonsData) },
-      { Field: "Top Solution", Value: topOf(solutionData) },
-      { Field: "Generated On", Value: new Date().toLocaleString("en-IN") },
-    ];
-    const wsSummary = XLSX.utils.json_to_sheet(summaryRows, { skipHeader: true });
-    wsSummary["!cols"] = [{ wch: 26 }, { wch: 30 }];
-    XLSX.utils.book_append_sheet(wb, wsSummary, "Dashboard Summary");
-
-    // Sheet 3: Waste Type Chart Data
-    const wasteTypeRows = [...pieData]
-      .sort((a, b) => b.value - a.value)
-      .map((d) => ({ "Waste Type": d.name, Count: d.value }));
-    const wsWasteType = XLSX.utils.json_to_sheet(wasteTypeRows);
-    wsWasteType["!cols"] = autoSizeColumns(wasteTypeRows.length ? wasteTypeRows : [{ "Waste Type": "", Count: "" }]);
-    XLSX.utils.book_append_sheet(wb, wsWasteType, "Chart Data");
-
-    // Sheet 4: Problem Analysis
-    const problemRows = problemsData.map((d) => ({ Problem: d.name, "Percentage (%)": Number(d.value.toFixed(1)) }));
-    const wsProblems = XLSX.utils.json_to_sheet(problemRows);
-    wsProblems["!cols"] = autoSizeColumns(problemRows.length ? problemRows : [{ Problem: "", "Percentage (%)": "" }]);
-    XLSX.utils.book_append_sheet(wb, wsProblems, "Problem Analysis");
-
-    // Sheet 5: Location Analytics
-    const locationRows = settingData.map((d) => ({ "Location Type": d.name, "Percentage (%)": Number(d.value.toFixed(1)) }));
-    const wsLocations = XLSX.utils.json_to_sheet(locationRows);
-    wsLocations["!cols"] = autoSizeColumns(locationRows.length ? locationRows : [{ "Location Type": "", "Percentage (%)": "" }]);
-    XLSX.utils.book_append_sheet(wb, wsLocations, "Location Analytics");
-
-    // Filename: city + ward + date, so the file itself documents which filter it came from
-    const dateStamp = new Date().toISOString().slice(0, 10);
-    const wardForFilename = selectedRow
-      ? `Ward${selectedRow["GVP Ward"] ?? "NA"}`
-      : selectedWards.length > 0
-      ? `Ward-${selectedWards.join("-")}`
-      : "AllWards";
-    const filename = `BharatGarbageTracker_${selectedCity}_${wardForFilename}_${dateStamp}.xlsx`;
-
-    XLSX.writeFile(wb, filename);
-  }, [
-    selectedRow,
-    filteredDataForCards,
-    selectedCity,
-    selectedWards,
-    totalGarbagePoints,
-    totalHathGadiVolume,
-    pieData,
-    problemsData,
-    reasonsData,
-    solutionData,
-    settingData,
-  ]);
-
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
-
   const isNagpurSelected = selectedCity === "Nagpur";
   const isPuneSelected = selectedCity === "Pune";
   const isAllSelected = selectedCity === "All";
   const isDashboardCity = isNagpurSelected || isPuneSelected || isAllSelected;
+
+  // ===================== DASHBOARD SCREENSHOT EXPORT =====================
+  // Captures EXACTLY what is currently on screen — cards, wards, photos
+  // list, and the map — plus the Key Findings charts (opening that popup
+  // briefly if it wasn't already open, then restoring it to whatever state
+  // it was in before). Everything is stitched into one tall, colorful PNG.
+  const handleDownloadScreenshot = useCallback(async () => {
+    if (!dashboardCaptureRef.current) {
+      window.alert("Nothing to capture yet — please wait for the dashboard to load.");
+      return;
+    }
+
+    setIsCapturingScreenshot(true);
+
+    // Remember whether the analytics popup was already open, so we can put
+    // things back exactly as they were once the screenshot is done.
+    const wasKeyFindingsOpen = isKeyFindingsOpen;
+
+    try {
+      const captureOptions = {
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        scale: Math.min(window.devicePixelRatio || 1, 2),
+        logging: false,
+      };
+
+      // 1) Capture the main dashboard (cards, wards, photos, map) as it looks right now
+      const dashboardCanvas = await html2canvas(dashboardCaptureRef.current, captureOptions);
+
+      // 2) Make sure the analytics charts are actually rendered, then capture them too
+      let analyticsCanvas = null;
+      if (isDashboardCity) {
+        if (!wasKeyFindingsOpen) {
+          setIsKeyFindingsOpen(true);
+          // Give React + the chart animations a moment to render before capturing
+          await new Promise((resolve) => setTimeout(resolve, 700));
+        }
+        if (analyticsCaptureRef.current) {
+          analyticsCanvas = await html2canvas(analyticsCaptureRef.current, captureOptions);
+        }
+        if (!wasKeyFindingsOpen) {
+          setIsKeyFindingsOpen(false);
+        }
+      }
+
+      // 3) Stitch both canvases into a single tall image
+      const gap = 24;
+      const width = Math.max(dashboardCanvas.width, analyticsCanvas ? analyticsCanvas.width : 0);
+      const height =
+        dashboardCanvas.height + (analyticsCanvas ? gap + analyticsCanvas.height : 0);
+
+      const finalCanvas = document.createElement("canvas");
+      finalCanvas.width = width;
+      finalCanvas.height = height;
+      const ctx = finalCanvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+      ctx.drawImage(dashboardCanvas, 0, 0);
+      if (analyticsCanvas) {
+        ctx.drawImage(analyticsCanvas, 0, dashboardCanvas.height + gap);
+      }
+
+      // 4) Trigger the download
+      const dateStamp = new Date().toISOString().slice(0, 10);
+      const wardForFilename = selectedRow
+        ? `Ward${selectedRow["GVP Ward"] ?? "NA"}`
+        : selectedWards.length > 0
+        ? `Ward-${selectedWards.join("-")}`
+        : "AllWards";
+      const filename = `BharatGarbageTracker_${selectedCity}_${wardForFilename}_${dateStamp}.png`;
+
+      finalCanvas.toBlob((blob) => {
+        if (!blob) {
+          window.alert("Could not generate the screenshot. Please try again.");
+          return;
+        }
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, "image/png");
+    } catch (err) {
+      window.alert("Something went wrong while creating the screenshot. Please try again.");
+    } finally {
+      setIsCapturingScreenshot(false);
+    }
+  }, [isKeyFindingsOpen, isDashboardCity, selectedRow, selectedWards, selectedCity]);
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
 
   // Dynamically derive available cities from merged data (sorted alphabetically)
   const availableCities = useMemo(() => {
@@ -2017,7 +1901,7 @@ function App() {
         <Route path="/impact" element={<Impact />} />
         <Route path="/" element={
           <>
-            <div className="flex flex-col lg:flex-row gap-6 mt-6">
+            <div ref={dashboardCaptureRef} className="flex flex-col lg:flex-row gap-6 mt-6">
               {/* LEFT COLUMN */}
               <div className="w-full lg:w-[460px] space-y-6">
 
@@ -2033,13 +1917,14 @@ function App() {
                   </div>
                 ) : isDashboardCity ? (
                   <>
-                    {/* Download Excel Button — exports exactly what's on screen */}
+                    {/* Download Summary Button — captures the whole dashboard (cards, map, and charts) as one colorful screenshot */}
                     <button
-                      onClick={handleDownloadExcel}
-                      className="group w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-indigo-300/60 hover:shadow-xl transition-all duration-300 active:scale-[0.98]"
+                      onClick={handleDownloadScreenshot}
+                      disabled={isCapturingScreenshot}
+                      className="group w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-indigo-300/60 hover:shadow-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                      <FaFileExcel className="text-lg group-hover:scale-110 transition-transform duration-300" />
-                      Download Summary
+                      <FaCamera className="text-lg group-hover:scale-110 transition-transform duration-300" />
+                      {isCapturingScreenshot ? "Generating Screenshot..." : "Download Summary"}
                       <FaDownload className="text-sm opacity-80 group-hover:translate-y-0.5 transition-transform duration-300" />
                     </button>
 
@@ -2157,16 +2042,19 @@ function App() {
                             <TileLayer
                               attribution='Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics'
                               url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                              crossOrigin="anonymous"
                             />
                             <TileLayer
                               attribution='Labels &copy; Esri'
                               url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+                              crossOrigin="anonymous"
                             />
                           </>
                         ) : (
                           <TileLayer
                             attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            crossOrigin="anonymous"
                           />
                         )}
                         <MapController
@@ -2279,7 +2167,7 @@ function App() {
                         </button>
                       </div>
 
-                      <div className="w-full space-y-6 p-4 sm:p-6">
+                      <div ref={analyticsCaptureRef} className="w-full space-y-6 p-4 sm:p-6">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 w-full hover:shadow-xl transition-shadow duration-300">
                       <h3 className="text-center text-sm sm:text-base font-semibold mb-2 text-gray-700">
