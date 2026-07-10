@@ -29,13 +29,14 @@ import "leaflet.markercluster"; // plain Leaflet plugin — attaches L.markerClu
 import ReactDOMServer from "react-dom/server";
 import { useMediaQuery } from "react-responsive";
 import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import CountUp from "react-countup";
 import {
   FaMapMarkerAlt,
   FaRecycle,
   FaChartBar,
   FaDownload,
-  FaCamera,
+  FaFilePdf,
 } from "react-icons/fa";
 
 import staticDataRaw from "./data_cleaned.json";
@@ -1683,7 +1684,7 @@ function App() {
   // list, and the map — plus the Key Findings charts (opening that popup
   // briefly if it wasn't already open, then restoring it to whatever state
   // it was in before). Everything is stitched into one tall, colorful PNG.
-  const handleDownloadScreenshot = useCallback(async () => {
+  const handleDownloadPDF = useCallback(async () => {
     if (!dashboardCaptureRef.current) {
       window.alert("Nothing to capture yet — please wait for the dashboard to load.");
       return;
@@ -1692,7 +1693,7 @@ function App() {
     setIsCapturingScreenshot(true);
 
     // Remember whether the analytics popup was already open, so we can put
-    // things back exactly as they were once the screenshot is done.
+    // things back exactly as they were once the PDF is done.
     const wasKeyFindingsOpen = isKeyFindingsOpen;
 
     try {
@@ -1711,7 +1712,7 @@ function App() {
       if (isDashboardCity) {
         if (!wasKeyFindingsOpen) {
           setIsKeyFindingsOpen(true);
-          // Give React + the chart animations a moment to render before capturing
+          // Give React + the charts a moment to render before capturing
           await new Promise((resolve) => setTimeout(resolve, 700));
         }
         if (analyticsCaptureRef.current) {
@@ -1739,31 +1740,28 @@ function App() {
         ctx.drawImage(analyticsCanvas, 0, dashboardCanvas.height + gap);
       }
 
-      // 4) Trigger the download
+      // 4) Drop the full image into a PDF sized to fit it exactly — nothing
+      // gets cropped or split across pages, it's one tall page start to finish.
+      const imgData = finalCanvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: width > height ? "landscape" : "portrait",
+        unit: "px",
+        format: [width, height],
+        compress: true,
+      });
+      pdf.addImage(imgData, "PNG", 0, 0, width, height);
+
       const dateStamp = new Date().toISOString().slice(0, 10);
       const wardForFilename = selectedRow
         ? `Ward${selectedRow["GVP Ward"] ?? "NA"}`
         : selectedWards.length > 0
         ? `Ward-${selectedWards.join("-")}`
         : "AllWards";
-      const filename = `BharatGarbageTracker_${selectedCity}_${wardForFilename}_${dateStamp}.png`;
+      const filename = `BharatGarbageTracker_${selectedCity}_${wardForFilename}_${dateStamp}.pdf`;
 
-      finalCanvas.toBlob((blob) => {
-        if (!blob) {
-          window.alert("Could not generate the screenshot. Please try again.");
-          return;
-        }
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      }, "image/png");
+      pdf.save(filename);
     } catch (err) {
-      window.alert("Something went wrong while creating the screenshot. Please try again.");
+      window.alert("Something went wrong while creating the PDF. Please try again.");
     } finally {
       setIsCapturingScreenshot(false);
     }
@@ -1917,14 +1915,14 @@ function App() {
                   </div>
                 ) : isDashboardCity ? (
                   <>
-                    {/* Download Summary Button — captures the whole dashboard (cards, map, and charts) as one colorful screenshot */}
+                    {/* Download Summary Button — captures the whole dashboard (cards, map, and charts) as one colorful PDF */}
                     <button
-                      onClick={handleDownloadScreenshot}
+                      onClick={handleDownloadPDF}
                       disabled={isCapturingScreenshot}
                       className="group w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-indigo-300/60 hover:shadow-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                      <FaCamera className="text-lg group-hover:scale-110 transition-transform duration-300" />
-                      {isCapturingScreenshot ? "Generating Screenshot..." : "Download Summary"}
+                      <FaFilePdf className="text-lg group-hover:scale-110 transition-transform duration-300" />
+                      {isCapturingScreenshot ? "Generating PDF..." : "Download Summary"}
                       <FaDownload className="text-sm opacity-80 group-hover:translate-y-0.5 transition-transform duration-300" />
                     </button>
 
