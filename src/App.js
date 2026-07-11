@@ -1472,31 +1472,12 @@ function App() {
   const [error, setError] = useState(null);
   const [isKeyFindingsOpen, setIsKeyFindingsOpen] = useState(false);
   const [mapLayerType, setMapLayerType] = useState("street"); // "street" | "satellite"
-  const [showAnalyticsFab, setShowAnalyticsFab] = useState(false);
   const [isCapturingScreenshot, setIsCapturingScreenshot] = useState(false);
-  const mapSectionRef = useRef(null);
   const dashboardCaptureRef = useRef(null); // wraps cards + wards + photos + map (everything currently on screen)
-  const analyticsCaptureRef = useRef(null); // wraps just the charts inside the Key Findings popup
+  const analyticsCaptureRef = useRef(null); // wraps just the charts inside the Key Findings accordion
 
   const handleMapReady = useCallback((map) => {
     mapInstanceRef.current = map;
-  }, []);
-
-  // Show a floating "Key Findings" button once the user has scrolled past
-  // the bottom of the vertical map — tapping it (or the heading below the
-  // map) opens the analytics popup. Purely additive: it doesn't touch any
-  // existing filter/data logic, and closing the popup returns everything
-  // to exactly how it was before.
-  useEffect(() => {
-    const handleScroll = () => {
-      const el = mapSectionRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      setShowAnalyticsFab(rect.bottom <= 80);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const isSmallScreen = useMediaQuery({ query: "(max-width: 768px)" });
@@ -2028,7 +2009,7 @@ function App() {
                 {isDashboardCity ? (
                   <>
                     {/* Map */}
-                    <div ref={mapSectionRef} className="h-[750px] lg:h-[900px] relative">
+                    <div className="h-[750px] lg:h-[900px] relative">
                       <MapContainer
                         key={selectedCity}
                         center={mapCenter}
@@ -2103,20 +2084,6 @@ function App() {
                         <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-orange-400 inline-block" /> Medium waste</div>
                         <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" /> Low waste</div>
                       </div>
-
-                      {/* Floating "Key Findings" popup trigger — appears once the
-                          user has scrolled past the bottom of the map, so they
-                          never have to hunt for the analytics section below. */}
-                      {showAnalyticsFab && (
-                        <button
-                          type="button"
-                          onClick={() => setIsKeyFindingsOpen(true)}
-                          className="fixed bottom-6 right-6 z-[1200] flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold pl-4 pr-5 py-3 rounded-full shadow-2xl hover:shadow-indigo-300/60 transition-all duration-300 active:scale-95"
-                        >
-                          <FaChartBar className="text-base" />
-                          <span className="text-sm">Key Findings</span>
-                        </button>
-                      )}
                     </div>
 
                   </>
@@ -2130,42 +2097,19 @@ function App() {
               <>
                 <div
                   className="flex justify-center items-center gap-2 mt-8 cursor-pointer group"
-                  onClick={() => setIsKeyFindingsOpen(true)}
+                  onClick={() => setIsKeyFindingsOpen(!isKeyFindingsOpen)}
                 >
                   <FaChartBar className="text-indigo-500 group-hover:scale-110 transition-transform duration-300" />
                   <h2 className="text-2xl font-bold text-black">
                     Key Findings from the GVP Survey
                   </h2>
-                  <span className="pointer-events-none">▼</span>
+                  <span className="pointer-events-none">{isKeyFindingsOpen ? "▲" : "▼"}</span>
                 </div>
 
-                {/* Key Findings Popup — opens over the page instead of pushing
-                    content down. Closing it (X or backdrop click) simply
-                    hides the popup again; nothing underneath changes. */}
+                {/* Key Findings Accordion — expands inline on the same vertical
+                    page when the arrow above is clicked. No popups/modals. */}
                 {isKeyFindingsOpen && (
-                  <div
-                    className="fixed inset-0 z-[2000] flex items-stretch sm:items-center justify-center bg-black/50 backdrop-blur-sm sm:p-6"
-                    onClick={() => setIsKeyFindingsOpen(false)}
-                  >
-                    <div
-                      className="bg-gray-50 w-full h-full sm:h-auto sm:max-w-6xl sm:max-h-[92vh] rounded-none sm:rounded-2xl shadow-2xl overflow-y-auto relative"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div className="sticky top-0 z-10 flex items-center justify-between bg-white/95 backdrop-blur px-4 sm:px-6 py-4 border-b border-gray-100 rounded-t-none sm:rounded-t-2xl">
-                        <h2 className="text-lg sm:text-xl font-bold text-gray-800">
-                          Key Findings from the GVP Survey
-                        </h2>
-                        <button
-                          type="button"
-                          onClick={() => setIsKeyFindingsOpen(false)}
-                          className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900 text-lg font-bold transition-colors duration-200"
-                          aria-label="Close"
-                        >
-                          ×
-                        </button>
-                      </div>
-
-                      <div ref={analyticsCaptureRef} className="w-full space-y-6 p-4 sm:p-6">
+                  <div ref={analyticsCaptureRef} className="w-full space-y-6 mt-6">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 w-full hover:shadow-xl transition-shadow duration-300">
                       <h3 className="text-center text-sm sm:text-base font-semibold mb-2 text-gray-700">
@@ -2481,8 +2425,6 @@ function App() {
                       </div>
                     </div>
 
-                      </div>
-                    </div>
                   </div>
                 </div>
                 )}
