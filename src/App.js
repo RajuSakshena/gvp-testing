@@ -37,6 +37,7 @@ import {
   FaChartBar,
   FaDownload,
   FaFilePdf,
+  FaChevronDown,
 } from "react-icons/fa";
 
 import staticDataRaw from "./data_cleaned.json";
@@ -1444,18 +1445,21 @@ const CitySlicer = ({ selectedCity, setSelectedCity, availableCities }) => {
       <h2 className="text-lg font-semibold text-gray-700 mb-4 text-center">
         Select City
       </h2>
-      <select
-        value={selectedCity}
-        onChange={(e) => setSelectedCity(e.target.value)}
-        className="w-full p-2 border border-gray-300 rounded-lg shadow-sm bg-white text-base focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      >
-        <option value="All">All</option>
-        {availableCities.map((city) => (
-          <option key={city} value={city}>
-            {city}
-          </option>
-        ))}
-      </select>
+      <div className="relative w-full">
+        <select
+          value={selectedCity}
+          onChange={(e) => setSelectedCity(e.target.value)}
+          className="w-full appearance-none text-center pl-3 pr-9 py-2.5 border border-gray-300 rounded-lg shadow-sm bg-white text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+          <option value="All">All</option>
+          {availableCities.map((city) => (
+            <option key={city} value={city}>
+              {city}
+            </option>
+          ))}
+        </select>
+        <FaChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400" />
+      </div>
     </div>
   );
 };
