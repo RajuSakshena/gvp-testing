@@ -1681,6 +1681,11 @@ function App() {
 
     setIsCapturingScreenshot(true);
 
+    // Let React actually re-render the button in its "capturing" styles
+    // before we screenshot the dashboard — otherwise html2canvas can grab
+    // a frame from before the style switch even applied.
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
     // Remember whether the analytics popup was already open, so we can put
     // things back exactly as they were once the PDF is done.
     const wasKeyFindingsOpen = isKeyFindingsOpen;
@@ -1908,9 +1913,12 @@ function App() {
                     <button
                       onClick={handleDownloadPDF}
                       disabled={isCapturingScreenshot}
-                      className="group w-full text-center pt-1 pb-5 px-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-indigo-300/60 hover:shadow-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                      className={`group w-full text-center px-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-indigo-300/60 hover:shadow-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed ${isCapturingScreenshot ? "pt-1 pb-5" : "py-3"}`}
                     >
-                      <FaFilePdf className="inline text-lg mr-2 group-hover:scale-110 transition-transform duration-300" />
+                      <FaFilePdf
+                        className="inline text-lg mr-2 group-hover:scale-110 transition-transform duration-300"
+                        style={isCapturingScreenshot ? { position: "relative", top: "6px" } : undefined}
+                      />
                       {isCapturingScreenshot ? "Generating PDF..." : "Download Summary"}
                     </button>
 
