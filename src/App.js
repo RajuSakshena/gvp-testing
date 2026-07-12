@@ -1909,13 +1909,20 @@ function App() {
                     <button
                       onClick={handleDownloadPDF}
                       disabled={isCapturingScreenshot}
-                      className="group relative w-full flex items-center py-3 px-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-indigo-300/60 hover:shadow-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                      className="group w-full h-12 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-indigo-300/60 hover:shadow-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed text-center"
+                      style={{ lineHeight: "48px" }}
                     >
-                      <FaFilePdf className="absolute left-4 top-1/2 -translate-y-1/2 text-lg group-hover:scale-110 transition-transform duration-300" />
-                      <span className="w-full text-center">
+                      <FaFilePdf
+                        className="text-lg group-hover:scale-110 transition-transform duration-300"
+                        style={{ display: "inline-block", verticalAlign: "middle", marginRight: "8px" }}
+                      />
+                      <span style={{ display: "inline-block", verticalAlign: "middle" }}>
                         {isCapturingScreenshot ? "Generating PDF..." : "Download Summary"}
                       </span>
-                      <FaDownload className="absolute right-4 top-1/2 -translate-y-1/2 text-sm opacity-80 group-hover:translate-y-0.5 transition-transform duration-300" />
+                      <FaDownload
+                        className="text-sm opacity-80"
+                        style={{ display: "inline-block", verticalAlign: "middle", marginLeft: "8px" }}
+                      />
                     </button>
 
                     {/* Summary Cards */}
