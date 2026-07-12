@@ -35,7 +35,6 @@ import {
   FaMapMarkerAlt,
   FaRecycle,
   FaChartBar,
-  FaDownload,
   FaFilePdf,
   FaChevronDown,
 } from "react-icons/fa";
@@ -1909,11 +1908,10 @@ function App() {
                     <button
                       onClick={handleDownloadPDF}
                       disabled={isCapturingScreenshot}
-                      className="group w-full text-center pt-1 pb-5 pl-4 pr-6 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-indigo-300/60 hover:shadow-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                      className="group w-full text-center pt-1 pb-5 px-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-indigo-300/60 hover:shadow-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                       <FaFilePdf className="inline text-lg mr-2 group-hover:scale-110 transition-transform duration-300" />
                       {isCapturingScreenshot ? "Generating PDF..." : "Download Summary"}
-                      <FaDownload className="inline text-sm opacity-80 ml-2" />
                     </button>
 
                     {/* Summary Cards */}
