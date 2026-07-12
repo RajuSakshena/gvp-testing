@@ -346,15 +346,20 @@ const DataTable = ({ data, onRowClick, selectedRowStart }) => {
       </h2>
       <div className="overflow-y-auto max-h-[348px] rounded-xl border border-gray-100">
         <table className="min-w-full divide-y divide-gray-200 table-fixed text-sm">
+          <colgroup>
+            <col className="w-[18%]" />
+            <col className="w-[52%]" />
+            <col className="w-[30%]" />
+          </colgroup>
           <thead className="bg-gradient-to-r from-indigo-50 to-cyan-50 sticky top-0 z-10 shadow-sm">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">
+              <th className="px-2 sm:px-4 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">
                 GVP Ward
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">
+              <th className="px-2 sm:px-4 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">
                 Nearest Location
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">
+              <th className="px-2 sm:px-4 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">
                 Media
               </th>
             </tr>
@@ -387,22 +392,22 @@ const DataTable = ({ data, onRowClick, selectedRowStart }) => {
               return (
                 <tr
                   key={rowKey}
-                  className="hover:bg-indigo-50 hover:scale-[1.01] transition-all duration-150 cursor-pointer"
+                  className="hover:bg-indigo-50 hover:scale-[1.01] transition-all duration-150 cursor-pointer align-top"
                   style={{
-                    height: "40px",
+                    minHeight: "40px",
                     backgroundColor: isSelected
                       ? "#C7D2FE"
                       : rowColors[index % rowColors.length],
                   }}
                   onClick={() => onRowClick(rowStart)}
                 >
-                  <td className="px-4 text-sm font-medium text-gray-900">
+                  <td className="px-2 sm:px-4 py-2 text-sm font-medium text-gray-900 break-words">
                     {row["GVP Ward"] || "N/A"}
                   </td>
-                  <td className="px-4 text-sm text-gray-700">
+                  <td className="px-2 sm:px-4 py-2 text-sm text-gray-700 break-words">
                     {row["Nearest Location"] || "N/A"}
                   </td>
-                  <td className="media-cell px-4 text-sm text-gray-700">
+                  <td className="media-cell px-2 sm:px-4 py-2 text-sm text-gray-700">
                     {photoUrl && photoUrl.startsWith("http") ? (
                       <a
                         href={photoUrl}
@@ -1904,11 +1909,13 @@ function App() {
                     <button
                       onClick={handleDownloadPDF}
                       disabled={isCapturingScreenshot}
-                      className="group w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-indigo-300/60 hover:shadow-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                      className="group relative w-full flex items-center py-3 px-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-indigo-300/60 hover:shadow-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                      <FaFilePdf className="text-lg group-hover:scale-110 transition-transform duration-300" />
-                      {isCapturingScreenshot ? "Generating PDF..." : "Download Summary"}
-                      <FaDownload className="text-sm opacity-80 group-hover:translate-y-0.5 transition-transform duration-300" />
+                      <FaFilePdf className="absolute left-4 top-1/2 -translate-y-1/2 text-lg group-hover:scale-110 transition-transform duration-300" />
+                      <span className="w-full text-center">
+                        {isCapturingScreenshot ? "Generating PDF..." : "Download Summary"}
+                      </span>
+                      <FaDownload className="absolute right-4 top-1/2 -translate-y-1/2 text-sm opacity-80 group-hover:translate-y-0.5 transition-transform duration-300" />
                     </button>
 
                     {/* Summary Cards */}
