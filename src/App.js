@@ -1919,7 +1919,7 @@ function App() {
                         className="inline text-lg mr-2 group-hover:scale-110 transition-transform duration-300"
                         style={isCapturingScreenshot ? { position: "relative", top: "6px" } : undefined}
                       />
-                      {isCapturingScreenshot ? "Generating PDF..." : "Download Summary"}
+                      Download Summary
                     </button>
 
                     {/* Summary Cards */}
