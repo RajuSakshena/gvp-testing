@@ -1909,20 +1909,22 @@ function App() {
                     <button
                       onClick={handleDownloadPDF}
                       disabled={isCapturingScreenshot}
-                      className="group w-full h-12 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-indigo-300/60 hover:shadow-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed text-center"
-                      style={{ lineHeight: "48px" }}
+                      className="group w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-indigo-300/60 hover:shadow-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                      style={{ display: "table", height: "48px", padding: 0 }}
                     >
-                      <FaFilePdf
-                        className="text-lg group-hover:scale-110 transition-transform duration-300"
-                        style={{ display: "inline-block", verticalAlign: "middle", marginRight: "8px" }}
-                      />
-                      <span style={{ display: "inline-block", verticalAlign: "middle" }}>
-                        {isCapturingScreenshot ? "Generating PDF..." : "Download Summary"}
+                      <span style={{ display: "table-cell", verticalAlign: "middle", textAlign: "center" }}>
+                        <FaFilePdf
+                          className="text-lg group-hover:scale-110 transition-transform duration-300"
+                          style={{ display: "inline-block", verticalAlign: "middle", marginRight: "8px" }}
+                        />
+                        <span style={{ display: "inline-block", verticalAlign: "middle" }}>
+                          {isCapturingScreenshot ? "Generating PDF..." : "Download Summary"}
+                        </span>
+                        <FaDownload
+                          className="text-sm opacity-80"
+                          style={{ display: "inline-block", verticalAlign: "middle", marginLeft: "8px" }}
+                        />
                       </span>
-                      <FaDownload
-                        className="text-sm opacity-80"
-                        style={{ display: "inline-block", verticalAlign: "middle", marginLeft: "8px" }}
-                      />
                     </button>
 
                     {/* Summary Cards */}
