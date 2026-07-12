@@ -1481,6 +1481,7 @@ function App() {
   const [isKeyFindingsOpen, setIsKeyFindingsOpen] = useState(false);
   const [mapLayerType, setMapLayerType] = useState("street"); // "street" | "satellite"
   const [isCapturingScreenshot, setIsCapturingScreenshot] = useState(false);
+  const [isCapturingButtonStyle, setIsCapturingButtonStyle] = useState(false);
   const dashboardCaptureRef = useRef(null); // wraps cards + wards + photos + map (everything currently on screen)
   const analyticsCaptureRef = useRef(null); // wraps just the charts inside the Key Findings accordion
 
@@ -1680,6 +1681,7 @@ function App() {
     }
 
     setIsCapturingScreenshot(true);
+    setIsCapturingButtonStyle(true);
 
     // Let React actually re-render the button in its "capturing" styles
     // before we screenshot the dashboard — otherwise html2canvas can grab
@@ -1700,6 +1702,11 @@ function App() {
 
       // 1) Capture the main dashboard (cards, wards, photos, map) as it looks right now
       const dashboardCanvas = await html2canvas(dashboardCaptureRef.current, captureOptions);
+
+      // The button only needs its special PDF-safe styling for that one
+      // snapshot above — revert it immediately so the live button looks
+      // normal (centered) again for the rest of the generation process.
+      setIsCapturingButtonStyle(false);
 
       // 2) Make sure the analytics charts are actually rendered, then capture them too
       let analyticsCanvas = null;
@@ -1758,6 +1765,7 @@ function App() {
       window.alert("Something went wrong while creating the PDF. Please try again.");
     } finally {
       setIsCapturingScreenshot(false);
+      setIsCapturingButtonStyle(false);
     }
   }, [isKeyFindingsOpen, isDashboardCity, selectedRow, selectedWards, selectedCity]);
 
@@ -1913,11 +1921,11 @@ function App() {
                     <button
                       onClick={handleDownloadPDF}
                       disabled={isCapturingScreenshot}
-                      className={`group w-full text-center px-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-indigo-300/60 hover:shadow-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed ${isCapturingScreenshot ? "pt-1 pb-5" : "py-3"}`}
+                      className={`group w-full text-center px-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-indigo-300/60 hover:shadow-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed ${isCapturingButtonStyle ? "pt-1 pb-5" : "py-3"}`}
                     >
                       <FaFilePdf
                         className="inline text-lg mr-2 group-hover:scale-110 transition-transform duration-300"
-                        style={isCapturingScreenshot ? { position: "relative", top: "6px" } : undefined}
+                        style={isCapturingButtonStyle ? { position: "relative", top: "6px" } : undefined}
                       />
                       Download Summary
                     </button>
