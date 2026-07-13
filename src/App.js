@@ -5,7 +5,6 @@ import "react-image-gallery/styles/css/image-gallery.css";
 import About from "./About";
 import Partners from "./Partners";
 import Impact from "./Impact";
-import Mainicon from "./our-partner/favicon.png";
 
 import {
   PieChart,
@@ -33,10 +32,10 @@ import jsPDF from "jspdf";
 import CountUp from "react-countup";
 import {
   FaMapMarkerAlt,
-  FaRecycle,
-  FaChartBar,
   FaFilePdf,
   FaChevronDown,
+  FaDolly,
+  FaCamera,
 } from "react-icons/fa";
 
 import staticDataRaw from "./data_cleaned.json";
@@ -340,7 +339,7 @@ const DataTable = ({ data, onRowClick, selectedRowStart }) => {
   return (
     <div className="bg-white p-4 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300 w-full h-full">
       <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-        <FaMapMarkerAlt className="text-indigo-500" />
+        <FaCamera className="text-indigo-500" />
         Photos and Videos of Garbage Points
       </h2>
       <div className="overflow-y-auto max-h-[348px] rounded-xl border border-gray-100">
@@ -1851,13 +1850,6 @@ function App() {
       {/* Header Section */}
       <div className="text-center mb-6 bg-white/70 backdrop-blur rounded-2xl shadow-sm border border-white/60 py-4">
         <div className="flex justify-center items-center gap-3 mb-2">
-          <img
-            src={Mainicon}
-            alt="Mainicon Logo"
-            className="h-10 w-auto"
-          
-          />
-
           <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-cyan-600 bg-clip-text text-transparent">
             Bharat Garbage Tracker
           </h1>
@@ -1875,13 +1867,13 @@ function App() {
             to="/about"
             className="text-gray-600 hover:text-indigo-600 font-semibold transition duration-300"
           >
-            About the Initiative
+            About
           </Link>
           <Link
             to="/partners"
             className="text-gray-600 hover:text-indigo-600 font-semibold transition duration-300"
           >
-            Our Partners
+            Partners
           </Link>
           <Link to="/impact" className="text-gray-600 hover:text-indigo-600 font-semibold transition duration-300">Impact</Link>
           <a
@@ -1890,7 +1882,7 @@ function App() {
             rel="noopener noreferrer"
             className="text-gray-600 hover:text-indigo-600 font-semibold transition duration-300"
           >
-            + Enter Data
+            +Contribute
           </a>
         </nav>
       </div>
@@ -1946,7 +1938,7 @@ function App() {
 
                       <div className={`relative overflow-hidden bg-white/80 backdrop-blur p-4 rounded-2xl shadow-lg text-center border border-gray-100 border-t-4 border-t-emerald-500 flex flex-col justify-center hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 ${CARD_SIZE_CLASSES}`}>
                         <div className="mx-auto mb-1 flex items-center justify-center w-9 h-9 rounded-full bg-emerald-50 text-emerald-500">
-                          <FaRecycle />
+                          <FaDolly />
                         </div>
                         <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                           GVP Waste Volume (Hath Gadi)
@@ -2118,11 +2110,11 @@ function App() {
             </div>
             {isDashboardCity ? (
               <>
+                <div className="mt-8 bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300">
                 <div
-                  className="flex justify-center items-center gap-2 mt-8 cursor-pointer group"
+                  className="flex justify-center items-center gap-2 cursor-pointer group"
                   onClick={() => setIsKeyFindingsOpen(!isKeyFindingsOpen)}
                 >
-                  <FaChartBar className="text-indigo-500 group-hover:scale-110 transition-transform duration-300" />
                   <h2 className="text-2xl font-bold text-black">
                     Key Findings from the GVP Survey
                   </h2>
@@ -2451,14 +2443,15 @@ function App() {
                   </div>
                 </div>
                 )}
+                </div>
 
                 {/* Footer — always visible, independent of the popup */}
-                <footer className="mt-12 pb-4 text-center">
+                <footer className="mt-8 pb-4 flex justify-center">
                   <a
                     href="https://themetropolitaninstitute.com/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xl font-bold text-gray-600 hover:text-blue-400 transition duration-300"
+                    className="inline-block px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-700 to-teal-800 text-white text-lg font-bold shadow-lg hover:shadow-xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-300"
                   >
                     Developed by The Metropolitan Institute
                   </a>
