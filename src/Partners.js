@@ -6,6 +6,7 @@ import AnvitiFoundation from "./our-partner/Anviti Foundation.png";
 import CFSD from "./our-partner/cfsd.jpeg";
 import GlobalShapers from "./our-partner/Global-Shapers-Nagpur.jpeg";
 import NMC from "./our-partner/Nagpur_Municipal_Corporation_logo.png";
+import Parisar from "./our-partner/Parisar.jpeg";
 import TMI from "./our-partner/TMI.png";
 import YuvaRuralAssociation from "./our-partner/YuvaRuralAssociation.png";
 
@@ -39,6 +40,12 @@ const partners = [
     logo: NMC,
     description:
       "Nagpur Municipal Corporation (NMC) is responsible for urban governance and service delivery in Nagpur, partnering on sanitation, waste management, and digital governance initiatives.",
+  },
+  {
+    name: "Parisar",
+    logo: Parisar,
+    description:
+      "Parisar works on the Just Transition of Street Vendors from Single Use Plastic, helping vendors navigate India's SUP ban by building their understanding of the links between plastics, health, and climate change, and laying the foundation for a shift to reusable and alternative solutions.",
   },
   {
     name: "The Metropolitan Institute (TMI)",
