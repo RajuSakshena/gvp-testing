@@ -1697,7 +1697,13 @@ function App() {
         backgroundColor: "#ffffff",
         scale: Math.min(window.devicePixelRatio || 1, 2),
         logging: false,
+        imageTimeout: 15000,
       };
+
+      // Give the map tiles a brief moment to finish loading/re-fetching
+      // (html2canvas re-requests tile images under CORS to capture them,
+      // so we wait a beat before snapshotting the dashboard).
+      await new Promise((resolve) => setTimeout(resolve, 400));
 
       // 1) Capture the main dashboard (cards, wards, photos, map) as it looks right now
       const dashboardCanvas = await html2canvas(dashboardCaptureRef.current, captureOptions);
@@ -2046,8 +2052,8 @@ function App() {
                           </>
                         ) : (
                           <TileLayer
-                            attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                             crossOrigin="anonymous"
                           />
                         )}
